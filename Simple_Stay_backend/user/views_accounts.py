@@ -95,24 +95,23 @@ class GoogleUser(APIView):
     def post(self, request):
 
         email = request.data.get('email')
+        print(email,'faseds')
         password = request.data.get('password')
 
-        if CustomUser.objects.filter(email=email).exists():
-            try:
-                user = get_object_or_404(CustomUser, email__iexact=email)
-            except:
-                user = None
-            if user is not None:
-                token=create_jwt_pair_tokens(user)
-                response_data = {
-                    'status': 'success',
-                    'msg': 'Login successfully',
-                    'token': token,
-                }
-                return Response(response_data, status=status.HTTP_201_CREATED)
-            else:
-                return Response({'status': 'error', 'msg': 'User not found'})
+        # Check if the user with the provided email already exists
+        existing_user = CustomUser.objects.filter(email=email).first()
+
+        if existing_user:
+            # User already exists, perform login
+            token = create_jwt_pair_tokens(existing_user)
+            response_data = {
+                'status': 'success',
+                'msg': 'Login successfully',
+                'token': token,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         else:
+            # User does not exist, proceed with Google signup
             serializer = UserGoogleSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 user = serializer.save()
@@ -121,17 +120,23 @@ class GoogleUser(APIView):
                 user.is_google = True
                 user.set_password(password)
                 user.save()
-            user = authenticate( email=email, password=password)
-            if user is not None:
-                token=create_jwt_pair_tokens(user)
-                response_data = {
-                    'status': 'success',
-                    'msg': 'Registration Successfully',
-                    'token': token,
-                }
-                return Response(response_data, status=status.HTTP_201_CREATED)
+
+                # Perform login after successful signup
+                user = authenticate(email=email, password=password)
+                if user is not None:
+                    token = create_jwt_pair_tokens(user)
+                    response_data = {
+                        'status': 'success',
+                        'msg': 'Registration and Login Successfully',
+                        'token': token,
+                    }
+                    return Response(response_data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({'status': 'error', 'msg': 'Login failed'})
+
             else:
                 return Response({'status': 'error', 'msg': serializer.errors})
+
     
 
 
@@ -142,7 +147,7 @@ def create_jwt_pair_tokens(user):
     refresh['email'] = user.email
     refresh['user_type'] = user.user_type
     refresh['is_active'] = user.is_active
-    refresh['is_admin'] = user.is_superuser
+    refresh['is_admin'] = user.is_admin
     refresh['is_google'] = user.is_google
 
    
