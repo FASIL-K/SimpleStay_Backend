@@ -4,6 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.validators import ValidationError
 
 
+
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

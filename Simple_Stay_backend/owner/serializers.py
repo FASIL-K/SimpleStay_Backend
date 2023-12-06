@@ -26,3 +26,9 @@ class UserGoogleSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password' : {'write_only' : True}
         }
+
+
+# class OwnerPostSerializer(serializers.ModelSerializer):
+#     class Meta:
+
+        

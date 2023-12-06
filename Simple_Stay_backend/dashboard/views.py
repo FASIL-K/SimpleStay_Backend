@@ -44,7 +44,7 @@ class SearchUserList(ListCreateAPIView):
     queryset = CustomUser.objects.all().exclude(is_admin=True)
     serializer_class = UserInfoSerializer
     filter_backends = [SearchFilter]
-    search_fields = ['email','user_type', 'is_active']
+    search_fields = ['email','user_type', 'is_active']  
 
 class UserBlock(APIView):
     def put(self, request, *args, **kwargs):
