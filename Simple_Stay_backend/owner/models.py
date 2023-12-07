@@ -32,7 +32,7 @@ class Post(models.Model):
         ('3BHK', '3BHK'),
     ]
 
-    ownerinfo = models.ForeignKey(OwnerInfo, on_delete=models.CASCADE, null=True)
+    ownerinfo = models.ForeignKey(OwnerInfo, on_delete=models.CASCADE, null=True ,blank=True)
     rentprice = models.PositiveBigIntegerField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     furnished_type = models.CharField(max_length=50, blank=True, null=True, choices=FURNISHED_TYPE)
@@ -42,6 +42,7 @@ class Post(models.Model):
     deposit_amount = models.PositiveBigIntegerField(null=True, blank=True)
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPE)
     bhk = models.CharField(max_length=50, choices=BHK)
+    is_available = models.BooleanField(default=True)
 
 
 
