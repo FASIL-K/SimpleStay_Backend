@@ -30,21 +30,64 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = myTokenObtainPairSerializer
 
 
-
 class UserRegister(CreateAPIView):
     def get_serializer_class(self):
         return UserRegisterSerializer
 
     def post(self, request):
+        try:
+            print('Request Data:', request.data)
+        # Your existing code here
+        except Exception as e:
+            print(f"Error during registration: {str(e)}")
+
+            return Response({'status': 'error', 'msg': 'An error occurred during registration.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         email = request.data.get('email')
         password = request.data.get('password')
 
+        # Check if an inactive user with the same email already exists
+        existing_user = CustomUser.objects.filter(email=email).first()
+        if existing_user:
+            if not existing_user.is_active:
+                # User is inactive and has not clicked the link, resend the verification email
+                current_site = get_current_site(request)
+                mail_subject = 'Please activate your account'
+                message = render_to_string('user/account_verification.html', {
+                    'user': existing_user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(existing_user.pk)),
+                    'token': default_token_generator.make_token(existing_user),
+                })
+
+                # Ensure email is valid before sending
+                if email and '@' in email:
+                    send_mail(
+                        mail_subject,
+                        message,
+                        'simplestayinfo@gmail.com',  # Replace with your actual "from" email address
+                        [email],
+                        fail_silently=False,
+                        html_message=message,  # Set the HTML message
+                    )
+
+                    return Response({'status': 'success', 'msg': 'Verification email resent.'}, status=status.HTTP_200_OK)
+
+                else:
+                    return Response({'status': 'error', 'msg': 'Invalid email address'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # User is active, cannot register
+            return Response({'status': 'error', 'msg': 'User is already active. Cannot register.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Continue with the registration process
         serializer = UserRegisterSerializer(data=request.data)
+        print(serializer,'DSCDASCFDASCDSA')
         if serializer.is_valid(raise_exception=True):
+
             user = serializer.save()
             user.user_type = "user"
             user.set_password(password)
             user.save()
+            print(user,'FECADFCESAFC')
 
             current_site = get_current_site(request)
             mail_subject = 'Please activate your account'
@@ -71,13 +114,12 @@ class UserRegister(CreateAPIView):
                     'data': serializer.data,
                     'status': status.HTTP_201_CREATED
                 })
-
             else:
-                return Response({'status': 'error', 'msg': 'Invalid email address'})
+                return Response({'status': 'error', 'msg': 'Invalid email address'}, status=status.HTTP_400_BAD_REQUEST)
 
         else:
             print('Serializer errors are:', serializer.errors)
-            return Response({'status': 'error', 'msg': serializer.errors})
+            return Response({'status': 'error', 'msg': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 

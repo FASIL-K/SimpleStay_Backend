@@ -49,17 +49,17 @@ class SearchUserList(ListCreateAPIView):
 class UserBlock(APIView):
     def put(self, request, *args, **kwargs):
         # Get the value from the URL parameter
-        value_to_update = kwargs.get('pk')
-        print(value_to_update)
-        if value_to_update is None:
+        user_id = kwargs.get('pk')
+        print(user_id)
+        if user_id is None:
             return Response({'error': 'Please provide a proper input.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Retrieve the user instance based on the provided pk
-            instance =CustomUser.objects.get(pk=value_to_update)
+            instance =CustomUser.objects.get(pk=user_id)
             print(instance)
         except CustomUser.DoesNotExist:
-            return Response({'error': f'User with id={value_to_update} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': f'User with id={user_id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Toggle the value of is_active
         instance.is_active = not instance.is_active
