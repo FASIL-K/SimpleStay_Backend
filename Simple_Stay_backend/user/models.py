@@ -56,6 +56,7 @@ class CustomUser(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_google = models.BooleanField(default=False)
     
+    
 
     
     objects = CustomUserManager()

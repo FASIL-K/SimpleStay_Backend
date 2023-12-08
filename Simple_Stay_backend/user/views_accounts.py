@@ -34,37 +34,51 @@ class MyTokenObtainPairView(TokenObtainPairView):
 class UserRegister(CreateAPIView):
     def get_serializer_class(self):
         return UserRegisterSerializer
+
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
 
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-
             user = serializer.save()
             user.user_type = "user"
             user.set_password(password)
             user.save()
-            
+
             current_site = get_current_site(request)
-            mail_subject = 'please activate your account'
-            message = render_to_string('user/account_verification.html',
-            {
-                'user' : user,
-                'domain' : current_site,
-                'uid' : urlsafe_base64_encode(force_bytes(user.pk)),
-                'token' : default_token_generator.make_token(user),
-                'site' : current_site
-
+            mail_subject = 'Please activate your account'
+            message = render_to_string('user/account_verification.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
             })
-            to_email = email
-            send_email = EmailMessage(mail_subject,message,to=[to_email])
-            send_email.send()
 
-            return Response({ 'msg' : 'a verifiaction link send to your email address', 'data' : serializer.data,'status':status.HTTP_201_CREATED})
+            # Ensure email is valid before sending
+            if email and '@' in email:
+                send_mail(
+                    mail_subject,
+                    message,
+                    'simplestayinfo@gmail.com',  # Replace with your actual "from" email address
+                    [email],
+                    fail_silently=False,
+                    html_message=message,  # Set the HTML message
+                )
+
+                return Response({
+                    'msg': 'A verification link has been sent to your email address',
+                    'data': serializer.data,
+                    'status': status.HTTP_201_CREATED
+                })
+
+            else:
+                return Response({'status': 'error', 'msg': 'Invalid email address'})
+
         else:
             print('Serializer errors are:', serializer.errors)
             return Response({'status': 'error', 'msg': serializer.errors})
+
 
 
                             
