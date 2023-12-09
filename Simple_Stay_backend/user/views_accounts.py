@@ -1,3 +1,4 @@
+import requests  # Make sure to import the 'requests' module
 from django.shortcuts import HttpResponseRedirect, get_object_or_404
 from django.urls import reverse
 from rest_framework.views import APIView
@@ -48,7 +49,8 @@ class UserRegister(CreateAPIView):
         # Check if an inactive user with the same email already exists
         existing_user = CustomUser.objects.filter(email=email).first()
         if existing_user:
-            if not existing_user.is_active:
+            
+            if not existing_user.is_verify:
                 # User is inactive and has not clicked the link, resend the verification email
                 current_site = get_current_site(request)
                 mail_subject = 'Please activate your account'
@@ -134,7 +136,8 @@ def activate(request, uidb64, token):
         user = None
     
     if user is not None and default_token_generator.check_token(user,token):
-        user.is_active = True
+        user.is_verify = True
+        user.is_active =True
         user.save()
         message = "Congrats, You have been succesfully registered"
         redirect_url =  'http://localhost:5173/login/' + '?message=' + message + '?token' + token
@@ -147,12 +150,28 @@ def activate(request, uidb64, token):
 
 
 class GoogleUser(APIView):
+    # permission_classes = [AllowAny]
+
 
     def post(self, request):
+        try:
+            print('Request Data:', request.data)
+        # Your existing code here
+        except Exception as e:
+            print(f"Error during registration: {str(e)}")
 
-        email = request.data.get('email')
+            return Response({'status': 'error', 'msg': 'An error occurred during registration.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+        access_token = request.data.get('access_token')
+        print(access_token,'fascsasdsa')
+        google_token_info = self.validate_google_token(access_token)
+
+        if google_token_info is None:
+            return Response({'status': 'error', 'msg': 'Invalid Google access token'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        email = google_token_info.get('email')
         print(email,'faseds')
-        password = request.data.get('password')
 
         # Check if the user with the provided email already exists
         existing_user = CustomUser.objects.filter(email=email).first()
@@ -168,32 +187,32 @@ class GoogleUser(APIView):
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
             # User does not exist, proceed with Google signup
-            serializer = UserGoogleSerializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                user = serializer.save()
-                user.user_type = "user"
-                user.is_active = True
-                user.is_google = True
-                user.set_password(password)
-                user.save()
+            user = CustomUser(email=email, user_type="user", is_active=True, is_google=True)
+            user.save()
 
-                # Perform login after successful signup
-                user = authenticate(email=email, password=password)
-                if user is not None:
-                    token = create_jwt_pair_tokens(user)
-                    response_data = {
-                        'status': 'success',
-                        'msg': 'Registration and Login Successfully',
-                        'token': token,
-                    }
-                    return Response(response_data, status=status.HTTP_201_CREATED)
-                else:
-                    return Response({'status': 'error', 'msg': 'Login failed'})
-
-            else:
-                return Response({'status': 'error', 'msg': serializer.errors})
-
+            # Perform login after successful signup
+            token = create_jwt_pair_tokens(user)
+            response_data = {
+                'status': 'success',
+                'msg': 'Registration and Login Successfully',
+                'token': token,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
     
+    def validate_google_token(self, access_token):
+        google_token_info_url = 'https://www.googleapis.com/oauth2/v3/tokeninfo'
+        params = {'access_token': access_token}
+        response = requests.get(google_token_info_url, params=params)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+
+
+
+
 
 
 def create_jwt_pair_tokens(user):

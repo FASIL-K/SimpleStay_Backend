@@ -44,6 +44,7 @@ class myTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email  # type: ignore
         token['user_type'] = user.user_type # type: ignore
         token['is_active'] = user.is_active
+        token['is_verify'] = user.is_verify
         token['is_admin'] = user.is_admin 
         token['is_google'] = user.is_google
 
