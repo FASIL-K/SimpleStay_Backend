@@ -24,6 +24,8 @@ from rest_framework.generics import (
     GenericAPIView,
 )
 from django.core.mail import send_mail
+from datetime import datetime, timedelta
+
 
 
 
@@ -48,6 +50,7 @@ class UserRegister(CreateAPIView):
 
         # Check if an inactive user with the same email already exists
         existing_user = CustomUser.objects.filter(email=email).first()
+        print(existing_user,'fwvdscassd')
         if existing_user:
             
             if not existing_user.is_verify:
@@ -127,26 +130,56 @@ class UserRegister(CreateAPIView):
 
                             
 
+# @api_view(['GET'])
+# def activate(request, uidb64, token):
+#     try:
+#         uid = urlsafe_base64_decode(uidb64).decode()
+#         user = CustomUser._default_manager.get(pk=uid)
+#     except (TypeError,ValueError,OverflowError,CustomUser.DoesNotExist):
+#         user = None
+    
+#     if user is not None and default_token_generator.check_token(user,token):
+#         user.is_verify = True
+#         user.is_active =True
+#         user.save()
+#         message = "Congrats, You have been succesfully registered"
+#         redirect_url =  'http://localhost:5173/login/' + '?message=' + message + '?token' + token
+#     else:
+#         message = 'Invalid activation link'
+#         redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
+    
+    
+#     return HttpResponseRedirect(redirect_url)
+
+
 @api_view(['GET'])
 def activate(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
         user = CustomUser._default_manager.get(pk=uid)
-    except (TypeError,ValueError,OverflowError,CustomUser.DoesNotExist):
+    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
-    
-    if user is not None and default_token_generator.check_token(user,token):
-        user.is_verify = True
-        user.is_active =True
-        user.save()
-        message = "Congrats, You have been succesfully registered"
-        redirect_url =  'http://localhost:5173/login/' + '?message=' + message + '?token' + token
+
+    if user is not None and default_token_generator.check_token(user, token):
+        # Check if the verification link has expired (e.g., 5 minutes limit)
+        link_creation_time = user.date_joined  # Adjust this based on your user model field
+        expiration_time = link_creation_time + timedelta(minutes=5)
+
+        if datetime.now() <= expiration_time:
+            user.is_verify = True
+            user.is_active = True
+            user.save()
+            message = "Congrats, You have been successfully registered"
+            redirect_url = 'http://localhost:5173/login/' + '?message=' + message + '?token' + token
+        else:
+            message = 'Verification link has expired. Please request a new one.'
+            redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
     else:
         message = 'Invalid activation link'
         redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
-    
-    
+
     return HttpResponseRedirect(redirect_url)
+
 
 
 class GoogleUser(APIView):
@@ -164,14 +197,12 @@ class GoogleUser(APIView):
         
 
         access_token = request.data.get('access_token')
-        print(access_token,'fascsasdsa')
         google_token_info = self.validate_google_token(access_token)
 
         if google_token_info is None:
             return Response({'status': 'error', 'msg': 'Invalid Google access token'}, status=status.HTTP_401_UNAUTHORIZED)
         
         email = google_token_info.get('email')
-        print(email,'faseds')
 
         # Check if the user with the provided email already exists
         existing_user = CustomUser.objects.filter(email=email).first()
