@@ -12,5 +12,6 @@ urlpatterns = [
     path('register/', UserRegister.as_view(),name = 'register'),
     path('googleuser/', GoogleUser.as_view(),name = 'googleuser'),
     path('activate/<uidb64>/<token> ', views_accounts.activate, name='activate'),
-
+    path('resend-verification-email/', UserRegister.as_view(), name='resend_verification_email'),
 ]
+
