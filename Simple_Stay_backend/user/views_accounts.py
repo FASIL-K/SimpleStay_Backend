@@ -25,6 +25,7 @@ from rest_framework.generics import (
 )
 from django.core.mail import send_mail
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 
@@ -151,7 +152,6 @@ class UserRegister(CreateAPIView):
     
 #     return HttpResponseRedirect(redirect_url)
 
-
 @api_view(['GET'])
 def activate(request, uidb64, token):
     try:
@@ -163,9 +163,11 @@ def activate(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         # Check if the verification link has expired (e.g., 5 minutes limit)
         link_creation_time = user.date_joined  # Adjust this based on your user model field
-        expiration_time = link_creation_time + timedelta(minutes=5)
+        expiration_time = link_creation_time + timedelta(minutes=30)
+        print("Current Time:", timezone.now())
+        print("Expiration Time:", expiration_time)
 
-        if datetime.now() <= expiration_time:
+        if timezone.now() <= expiration_time:
             user.is_verify = True
             user.is_active = True
             user.save()
@@ -179,8 +181,6 @@ def activate(request, uidb64, token):
         redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
 
     return HttpResponseRedirect(redirect_url)
-
-
 
 class GoogleUser(APIView):
     # permission_classes = [AllowAny]

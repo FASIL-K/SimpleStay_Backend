@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager 
-
+from django.utils import timezone
 
 
 
@@ -56,7 +56,8 @@ class CustomUser(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_google = models.BooleanField(default=False)
     is_verify = models.BooleanField(default=False)
-    
+    date_joined = models.DateTimeField(default=timezone.now)  # Add this line
+
     
 
     
