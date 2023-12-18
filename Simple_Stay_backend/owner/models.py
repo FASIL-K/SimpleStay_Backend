@@ -17,31 +17,18 @@ class OwnerInfo(models.Model):
 
 
 class Post(models.Model):
-    FURNISHED_TYPE = [
-        ('Fully Furnished', 'Fully Furnished'),
-        ('Semi Furnished', 'Semi Furnished'),
-        ('Unfurnished', 'Unfurnished'),
-    ]
-    PROPERTY_TYPE = [
-        ('Apartment', 'Apartment'),
-        ('Independent Floor', 'Independent Floor'),
-    ]
-    BHK = [
-        ('1BHK', '1BHK'),
-        ('2BHK', '2BHK'),
-        ('3BHK', '3BHK'),
-    ]
+   
 
     ownerinfo = models.ForeignKey(OwnerInfo, on_delete=models.CASCADE, null=True ,blank=True)
     rentprice = models.PositiveBigIntegerField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    furnished_type = models.CharField(max_length=50, blank=True, null=True, choices=FURNISHED_TYPE)
+    furnished_type = models.CharField(max_length=50, blank=True, null=True, )
     city = models.CharField(max_length=50)
     build_up_area = models.PositiveIntegerField(null=True, blank=True)
-    calendar_date = models.DateField(null=True, blank=True)
+    availableFrom = models.DateField(null=True, blank=True)
     deposit_amount = models.PositiveBigIntegerField(null=True, blank=True)
-    property_type = models.CharField(max_length=50, choices=PROPERTY_TYPE)
-    bhk = models.CharField(max_length=50, choices=BHK)
+    property_type = models.CharField(max_length=50, )
+    bhk = models.CharField(max_length=50,)
     is_available = models.BooleanField(default=True)
 
 

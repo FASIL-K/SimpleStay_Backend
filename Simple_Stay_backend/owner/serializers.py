@@ -37,5 +37,5 @@ class OwnerinfoSerializer(serializers.ModelSerializer):
 class OwnerPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = "__all__"
+        fields = ['id','city','build_up_area',"rentprice",]
         

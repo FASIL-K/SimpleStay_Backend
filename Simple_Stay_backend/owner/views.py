@@ -9,6 +9,7 @@ from rest_framework.filters import SearchFilter
 class PostCreateView(CreateAPIView):
     queryset = Post.objects.filter(is_available=True)
     serializer_class = OwnerPostSerializer
+    
 
 
 
