@@ -1,8 +1,11 @@
 
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
+from user.serializers import UserInfoSerializer
 from user.models import CustomUser
 from .models import *
+
+from rest_framework import viewsets, status
 
 
 
@@ -35,7 +38,9 @@ class OwnerinfoSerializer(serializers.ModelSerializer):
 
 
 class OwnerPostSerializer(serializers.ModelSerializer):
+    owner_data = UserInfoSerializer(source='owner', read_only=True)
+
     class Meta:
         model = Post
-        fields = ['id','city','build_up_area',"rentprice",]
+        fields = '__all__'
         
