@@ -37,10 +37,20 @@ class OwnerinfoSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class OwnerPostSerializer(serializers.ModelSerializer):
-    owner_data = UserInfoSerializer(source='owner', read_only=True)
+class PropertyImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyImage
+        fields = '__all__'
 
+class OwnerPostSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+    
     class Meta:
         model = Post
         fields = '__all__'
-        
+
+    def get_images(self, obj):
+        images_queryset = obj.propertyimage_set.all()
+        images_serializer = PropertyImageSerializer(images_queryset, many=True)
+        return images_serializer.data
+
