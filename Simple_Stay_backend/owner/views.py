@@ -23,13 +23,29 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = Post.objects.filter(owner=owner_id)
         return queryset 
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+
+        # Check if the 'is_available' field is present in the request data
+        if 'is_available' in request.data:
+            # Deactivate the post if 'is_available' is set to False
+            if not request.data['is_available']:
+                instance.is_available = False
+                instance.save()
+                return Response({'detail': 'Post deactivated successfully.'}, status=status.HTTP_200_OK)
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
 
 
 
 
 class PostUpdate(RetrieveUpdateAPIView):
     queryset = Post.objects.filter(is_available=True)   
-    serializer_class = OwnerPostSerializer  
+    serializer_class = OwnerPostSerializer 
 
 
 
@@ -38,7 +54,7 @@ class PostList(ListAPIView):
     filter_backends = (SearchFilter,)
     search_fields = [
         "bhk",
-        "build_up_area",
+        "build_up_area",        
         "calendar_date",
         "city",
         "deposit_amount",
@@ -52,3 +68,4 @@ class PostList(ListAPIView):
         "rentprice",
     ]
     serializer_class = OwnerPostSerializer
+    
