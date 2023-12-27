@@ -5,6 +5,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from django.db.models import F
 
 
 
@@ -12,17 +13,51 @@ from rest_framework.response import Response
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
 
-
+    
     # def get_queryset(self):
     #     owner_id = self.kwargs['owner_id']
-    #     pagination_class = PageNumberPagination
+    #     pagination_class = PageNumberPagination   
     #     pagination_class.page_size = 10
     #     return Post.objects.filter(owner=owner_id)
+    
     def get_queryset(self):
         owner_id = self.kwargs['owner_id']
-        queryset = Post.objects.filter(owner=owner_id)
-        return queryset 
+        queryset = Post.objects.filter(owner=owner_id).order_by('-created_at')
+        return queryset
 
+    def create(self, request, *args, **kwargs):
+        owner_id = self.kwargs['owner_id']
+        request.data['owner'] = owner_id
+        # print(request.data,"ananna")
+        serializer = OwnerPostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        post_id = serializer.data['id']
+        form_data = {}
+        form_data['post'] = post_id
+        data = []
+        flag = True
+
+        for image in request.FILES.getlist('image'):
+            form_data['image'] = image
+            serializer1 = PropertyImageSerializer(data=form_data) # type: ignore
+            if serializer1.is_valid():
+                serializer1.save()
+                data.append(serializer1.data)
+            else:
+                flag = False
+
+            
+        if flag:
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED )
+        else:
+            return Response(data=[], status=status.HTTP_400_BAD_REQUEST) 
+
+            
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)

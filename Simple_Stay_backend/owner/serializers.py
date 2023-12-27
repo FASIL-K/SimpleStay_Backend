@@ -36,12 +36,11 @@ class OwnerinfoSerializer(serializers.ModelSerializer):
         model = OwnerInfo
         fields = "__all__"
 
-
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyImage
-        fields = '__all__'
-
+        fields = ['id', 'image']
+        
 class OwnerPostSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     
@@ -53,4 +52,5 @@ class OwnerPostSerializer(serializers.ModelSerializer):
         images_queryset = obj.propertyimage_set.all()
         images_serializer = PropertyImageSerializer(images_queryset, many=True)
         return images_serializer.data
-
+    
+    

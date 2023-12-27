@@ -28,6 +28,8 @@ class Post(models.Model):
     available_from = models.DateField(null=True, blank=True)
     security_deposit = models.CharField(max_length=50)
     is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Add this line
+
 
 class PropertyImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
