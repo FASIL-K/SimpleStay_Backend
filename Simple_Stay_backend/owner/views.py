@@ -6,12 +6,14 @@ from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.db.models import F
+from rest_framework.permissions import IsAuthenticated
 
 
 
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
+    permission_classes = (IsAuthenticated,)
 
     
     # def get_queryset(self):
@@ -28,40 +30,37 @@ class PostViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         owner_id = self.kwargs['owner_id']
         request.data['owner'] = owner_id
-        # print(request.data,"ananna")
         serializer = OwnerPostSerializer(data=request.data)
+
         if serializer.is_valid():
-            serializer.save()
+            post_instance = serializer.save()
+
+            # Associate PropertyImage with the created Post instance
+            form_data = {'post': post_instance.id}
+            data = []
+            flag = True
+
+            for image in request.FILES.getlist('image'):
+                form_data['image'] = image
+                serializer1 = PropertyImageSerializer(data=form_data)
+
+                if serializer1.is_valid():
+                    serializer1.save(post=post_instance)  # Pass the post_instance to save
+                    data.append(serializer1.data)
+                else:
+                    flag = False
+
+            if flag:
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(data=[], status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        
-        post_id = serializer.data['id']
-        form_data = {}
-        form_data['post'] = post_id
-        data = []
-        flag = True
-
-        for image in request.FILES.getlist('image'):
-            form_data['image'] = image
-            serializer1 = PropertyImageSerializer(data=form_data) # type: ignore
-            if serializer1.is_valid():
-                serializer1.save()
-                data.append(serializer1.data)
-            else:
-                flag = False
-
-            
-        if flag:
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED )
-        else:
-            return Response(data=[], status=status.HTTP_400_BAD_REQUEST) 
 
             
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
-
         # Check if the 'is_available' field is present in the request data
         if 'is_available' in request.data:
             # Deactivate the post if 'is_available' is set to False
@@ -74,6 +73,11 @@ class PostViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
 
         return Response(serializer.data)
+
+
+class UserPostViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = OwnerPostSerializer
+    queryset = Post.objects.filter(is_available=True)
 
 
 

@@ -27,6 +27,8 @@ from django.core.mail import send_mail
 from datetime import datetime, timedelta
 from django.utils import timezone
 
+from rest_framework.permissions import IsAuthenticated
+
 
 
 
@@ -106,26 +108,7 @@ class UserRegister(APIView):
 
                             
 
-# @api_view(['GET'])
-# def activate(request, uidb64, token):
-#     try:
-#         uid = urlsafe_base64_decode(uidb64).decode()
-#         user = CustomUser._default_manager.get(pk=uid)
-#     except (TypeError,ValueError,OverflowError,CustomUser.DoesNotExist):
-#         user = None
-    
-#     if user is not None and default_token_generator.check_token(user,token):
-#         user.is_verify = True
-#         user.is_active =True
-#         user.save()
-#         message = "Congrats, You have been succesfully registered"
-#         redirect_url =  'http://localhost:5173/login/' + '?message=' + message + '?token' + token
-#     else:
-#         message = 'Invalid activation link'
-#         redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
-    
-    
-#     return HttpResponseRedirect(redirect_url)
+
 
 @api_view(['GET'])
 def activate(request, uidb64, token):
@@ -223,7 +206,7 @@ class GoogleUser(APIView):
 
 def create_jwt_pair_tokens(user):
 
-    refresh = RefreshToken.for_user(user)
+    refresh = RefreshToken.for_user(user) 
 
     refresh['email'] = user.email
     refresh['user_type'] = user.user_type
@@ -240,3 +223,61 @@ def create_jwt_pair_tokens(user):
         "access": access_token,
         "refresh": refresh_token,
     }
+
+
+# class Authentication(APIView):
+#     permission_classes =(IsAuthenticated,)
+#     def get(self,request):
+#         content={'id':str(request.user.id),'email':str(request.user.email),'is_active':str(request.user.is_active)}
+#         return Response(content)  
+
+ 
+class logout(APIView):
+    permission_classes =(IsAuthenticated,)
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh_token')
+            print(refresh_token,'daxoo')
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({'detail': 'Logout successful.'}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({'detail': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+        
+    
+
+# class  RefreshTokenAuto(APIView):
+#     permission_classes =(IsAuthenticated,)
+        
+#     def get(self,request):
+#         user=request.user
+        
+#         token = RefreshToken.for_user(user)
+#         token['email'] = user.email
+#         token['user_type'] = user.user_type
+#         token['is_active'] = user.is_active
+#         token['is_admin'] = user.is_admin
+#         token['is_google'] = user.is_google
+#         dataa = {
+#             "refresh": str(token),
+#             "access": str(token.access_token),
+#         }
+        
+#         if user.is_active:
+#             data = {
+#             "message": "Your Login successfully! ",
+#             "status": 201,
+#             "token": dataa,
+#         }
+#         else:
+#                 data = {
+#             "message": "Your Account has been blocked ! ",
+#             "status": 202,
+#             "token": dataa,
+#         }
+                
+#         return Response(data=data)       

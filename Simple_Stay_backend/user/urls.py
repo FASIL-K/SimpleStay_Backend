@@ -1,9 +1,11 @@
 
 
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
+# from rest_framework_simplejwt.views import TokenRefreshView
 from .views_accounts import *
 from .import views_accounts
+from rest_framework_simplejwt import views as jwt_views
+from rest_framework_simplejwt.views import (TokenRefreshView)
 
 urlpatterns = [
 
@@ -13,5 +15,9 @@ urlpatterns = [
     path('googleuser/', GoogleUser.as_view(),name = 'googleuser'),
     path('activate/<uidb64>/<token> ', views_accounts.activate, name='activate'),
     path('resend-verification-email/', UserRegister.as_view(), name='resend_verification_email'),
+    # path('authentication/',views_accounts.Authentication.as_view(), name='Authentication'), 
+    path('logout/',views_accounts.logout.as_view(), name='logout'), 
+    # path('token/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
+    # path('refreshtoken/',views_accounts.RefreshTokenAuto.as_view(),name ='RefreshTokenAuto'),
 ]
 

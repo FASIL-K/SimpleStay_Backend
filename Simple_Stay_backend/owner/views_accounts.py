@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail
 
 
@@ -18,7 +19,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import authenticate
-
+from user.views_accounts import logout
 
 
 class OwnerRegister(CreateAPIView):
@@ -167,3 +168,17 @@ def create_jwt_pair_tokens(user):
         "access_token": access_token,
         "refresh_token": refresh_token,
     }
+
+
+class OwnerLogout(APIView):
+    permission_classes =(IsAuthenticated,)
+    def post(self, request):
+        try:
+            refresh_token = request.data['refresh_token']
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({'detail': 'Logout successful.'}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({'detail': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
