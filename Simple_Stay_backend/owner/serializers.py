@@ -32,7 +32,7 @@ class UserGoogleSerializer(serializers.ModelSerializer):
         }
 
 class OwnerinfoSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = OwnerInfo
         fields = "__all__"
 
@@ -42,6 +42,9 @@ class PropertyImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
         
 class OwnerPostSerializer(serializers.ModelSerializer):
+    owner_detail = OwnerSerializer(source="owner", read_only=True)
+        # user_main = UserSerializer(source='user', read_only=True)
+
     images = serializers.SerializerMethodField()
     
     class Meta:

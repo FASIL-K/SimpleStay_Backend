@@ -3,6 +3,8 @@
 from django.urls import path
 # from rest_framework_simplejwt.views import TokenRefreshView
 from .views_accounts import *
+from.views import *
+
 from .import views_accounts
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.views import (TokenRefreshView)
@@ -19,5 +21,7 @@ urlpatterns = [
     path('logout/',views_accounts.logout.as_view(), name='logout'), 
     # path('token/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
     # path('refreshtoken/',views_accounts.RefreshTokenAuto.as_view(),name ='RefreshTokenAuto'),
+    path('searchpost/', SearchPostList.as_view(),name = 'searchpost'),
+
 ]
 

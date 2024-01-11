@@ -7,13 +7,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.db.models import F
 from rest_framework.permissions import IsAuthenticated
-
+from user.models import CustomUser
 
 
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     
     # def get_queryset(self):
@@ -24,7 +24,7 @@ class PostViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         owner_id = self.kwargs['owner_id']
-        queryset = Post.objects.filter(owner=owner_id).order_by('-created_at')
+        queryset = Post.objects.filter(owner=owner_id,is_blocked_by_admin=False).order_by('-created_at')
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -75,6 +75,21 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+def get_owner_details(owner_id):
+    # Retrieve user details based on owner_id
+    try:
+        user = CustomUser.objects.get(pk=owner_id)
+        owner_details = {
+            'username': user.username,
+            'email': user.email,
+            # Add other user details as needed
+        }
+        return owner_details
+    except CustomUser.DoesNotExist:
+        return {}
+
+
+
 class UserPostViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = OwnerPostSerializer
     queryset = Post.objects.filter(is_available=True)
@@ -107,4 +122,5 @@ class PostList(ListAPIView):
         "rentprice",
     ]
     serializer_class = OwnerPostSerializer
-    
+
+

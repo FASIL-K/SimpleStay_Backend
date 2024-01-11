@@ -12,6 +12,12 @@ urlpatterns = [
     path('listuser/', UserList.as_view(),name = 'listuser'),
     path('user_block_unblock/<int:pk>/',UserBlock.as_view(),name='userblock'),
     path('searchuser/', SearchUserList.as_view(),name = 'searchuser'),
+    path('listproperty/', PostList.as_view({'get': 'list'}), name='postlist'),
+    path('listproperty/<int:pk>/update/', PostList.as_view({'put': 'update'}), name='post-update'),
+
+    path('post_verification/<int:pk>/',VerifyPost.as_view(),name='postverification'),
+
+
 
 
 
