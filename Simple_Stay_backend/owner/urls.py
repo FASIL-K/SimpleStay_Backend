@@ -11,6 +11,7 @@ router.register(r'property-post/(?P<owner_id>\d+)', PostViewSet, basename='prope
 # for user  
 # router.register(r'conference', UserConferenceHall, basename='userConference')
 router.register(r'post',UserPostViewSet, basename='userPost')
+router.register(r'post/(?P<post_id>\d+)', UserPostViewSet, basename='userSinglePost')
 
 urlpatterns = [
     path('', include(router.urls)),

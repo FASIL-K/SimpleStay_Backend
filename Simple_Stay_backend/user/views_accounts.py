@@ -3,6 +3,7 @@ from django.shortcuts import HttpResponseRedirect, get_object_or_404
 from django.urls import reverse
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
+from django.contrib.auth.hashers import make_password
 
 from .models import CustomUser
 from .serializers import UserRegisterSerializer,myTokenObtainPairSerializer,UserGoogleSerializer
@@ -247,7 +248,32 @@ class logout(APIView):
         
         
         
-        
+class UserProfileEdit(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # Get the data from the request
+        new_username = request.data.get('username')
+        new_password = request.data.get('password')
+        new_email = request.data.get('email')
+        new_phone = request.data.get('phone')
+
+        # Update user profile based on provided data
+        if new_username:
+            user.username = new_username
+        if new_password:
+            user.set_password(new_password)
+        if new_email:
+            user.email = new_email
+        if new_phone:
+            user.phone = new_phone
+
+        # Save the updated user profile
+        user.save()
+
+        return Response({'status': 'success', 'msg': 'Profile updated successfully.'}, status=status.HTTP_200_OK)
     
 
 # class  RefreshTokenAuto(APIView):

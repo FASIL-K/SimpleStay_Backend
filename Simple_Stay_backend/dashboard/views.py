@@ -75,7 +75,7 @@ class UserBlock(APIView):
 
 class PostList(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
-    queryset=Post.objects.all()
+    queryset=Post.objects.all().order_by('-created_at')
 
    
     
