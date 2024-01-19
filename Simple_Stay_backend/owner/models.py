@@ -3,17 +3,14 @@ from django.db import models
 from user.models import CustomUser
 
 class OwnerInfo(models.Model):
-    userId = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    owner_name = models.CharField(max_length=100)
+    user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     phone = models.PositiveBigIntegerField(null=True, blank=True)
-    streetaddress = models.TextField(null=True)
-    country = models.CharField(max_length=100, null=True)
-    state = models.CharField(max_length=100, null=True)
-    city = models.CharField(max_length=100, null=True)
-    zipcode = models.BigIntegerField(null=True)
-    is_verify = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
+    profile_photo = models.FileField(
+        upload_to='Ownerprofiles/', blank=True, null=True)
+    
+    def __str__(self):
+        return self.owner.email
+    
 class Post(models.Model):
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     looking_to = models.CharField(max_length=50)

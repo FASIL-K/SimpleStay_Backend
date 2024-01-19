@@ -8,6 +8,7 @@ from.views import *
 from .import views_accounts
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.views import (TokenRefreshView)
+from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
 

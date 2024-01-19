@@ -21,6 +21,7 @@ urlpatterns = [
     path('postlist/',PostList.as_view(), name='PostList'),
     path('property-post/', PostViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='propertypost-detail'),
     path('logout/',OwnerLogout.as_view(), name='PostList'),
+    path('profileEdit/<int:pk>/', OwnerProfileEdit.as_view(),name="ownerprofile"),
 
     
 ]

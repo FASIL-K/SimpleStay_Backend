@@ -5,11 +5,11 @@ from django.utils import timezone
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, username, password=None, **extra_fields):
+    def create_user(self,email,password=None, **extra_fields):
         if not email:
-            raise ValueError('Email field must be set')
+            raise ValueError('email field must be set')
         email = self.normalize_email(email)
-        user = self.model(email=email, username=username, **extra_fields)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -49,8 +49,6 @@ class CustomUser(AbstractBaseUser):
 
     name = models.CharField(max_length=50,null=True,blank=True)
     email = models.EmailField(max_length=100,unique=True)
-    password = models.CharField(max_length=128)  # Store the hashed password
-
     phone = models.PositiveBigIntegerField(null=True,blank=True)
     user_type = models.CharField(max_length=100,default='user',choices=USER_TYPES)
     is_active = models.BooleanField(default=False)
@@ -59,7 +57,8 @@ class CustomUser(AbstractBaseUser):
     is_google = models.BooleanField(default=False)
     is_verify = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)  # Add this line
-
+    profile_photo = models.FileField(
+        upload_to='Userprofiles/', blank=True, null=True)
     
 
     

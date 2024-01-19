@@ -30,10 +30,17 @@ class UserGoogleSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password' : {'write_only' : True}
         }
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ["username", 'email', "user_type", "is_active"]
 
 class OwnerinfoSerializer(serializers.ModelSerializer):
+    owner_details = CustomUserSerializer(source='user', read_only=True)
+    profile_photo = serializers.ImageField(required=False)  # Add this line
+
     class Meta:
-        model = OwnerInfo
+        model = CustomUser
         fields = "__all__"
 
 class PropertyImageSerializer(serializers.ModelSerializer):
