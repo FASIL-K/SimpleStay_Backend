@@ -138,7 +138,7 @@ def activate(request, uidb64, token):
         message = 'Invalid activation link'
         redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
 
-    return HttpResponseRedirect(redirect_url)
+    return HttpResponseRedirect(redirect_url)   
 
 class GoogleUser(APIView):
     # permission_classes = [AllowAny]

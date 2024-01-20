@@ -1,6 +1,6 @@
 from rest_framework.generics import ListCreateAPIView ,ListAPIView , CreateAPIView ,RetrieveUpdateAPIView
 from .models import Post, PropertyImage
-from .serializers import OwnerPostSerializer, PropertyImageSerializer,OwnerinfoSerializer
+from .serializers import OwnerPostSerializer, PropertyImageSerializer,UserProfileUpdateSerializer,CustomUserSerializer
 from rest_framework.filters import SearchFilter
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
@@ -9,7 +9,7 @@ from django.db.models import F
 from rest_framework.permissions import IsAuthenticated
 from user.models import CustomUser
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import generics
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -125,55 +125,25 @@ class PostList(ListAPIView):
     serializer_class = OwnerPostSerializer
 
 
-# class OwnerProfileEdit(APIView):
-#     def put(self, request, *args, **kwargs):
-#         owner_id = kwargs.get('pk')
 
-#         try:
-#             owner = CustomUser.objects.get(pk=owner_id)
-#         except:
-#             return Response({"message": "Owner Not Found"}, status=status.HTTP_404_NOT_FOUND)
+    
 
-#         serializer = OwnerinfoSerializer(instance=owner, data=request.data, partial=True)
+class UserDetailsAPIView(generics.RetrieveAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
 
-#         if serializer.is_valid():
-#             serializer.save()
-#             data = {
-#                 "ownerData": serializer.data,
-#                 "message": "Profile Updated Successfully",
-#             }
+    def get_object(self):
+        return self.request.user
 
-#             return Response(data=data, status=status.HTTP_202_ACCEPTED)
-#         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)    
 
 
-class OwnerProfileEdit(APIView):
-    parser_classes = [MultiPartParser, FormParser]
+class UserProfileUpdateView(RetrieveUpdateAPIView):
+    serializer_class = UserProfileUpdateSerializer
+    permission_classes = [IsAuthenticated]
 
-    def put(self, request, *args, **kwargs):
-        owner_id = kwargs.get('pk')
-        print(request.data, "data")
-
-        try:
-            owner = CustomUser.objects.get(pk=owner_id)
-        except:
-            return Response({"message": "Owner Not Found"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Check if 'profileImage' is present in the request data
-        if 'profileImage' in request.data:
-            serializer = OwnerinfoSerializer(instance=owner, data=request.data, partial=True)
-        else:
-            # If 'profileImage' is not present, create the serializer without it
-            serializer = OwnerinfoSerializer(instance=owner, data=request.data, partial=True, exclude=['profileImage'])
-
-        if serializer.is_valid():
-            serializer.save()
-            data = {
-                "ownerData": serializer.data,
-                "message": "Profile Updated Successfully",
-            }
-
-            return Response(data=data, status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_object(self):
+        return self.request.user

@@ -30,18 +30,11 @@ class UserGoogleSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password' : {'write_only' : True}
         }
+
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["username", 'email', "user_type", "is_active"]
-
-class OwnerinfoSerializer(serializers.ModelSerializer):
-    owner_details = CustomUserSerializer(source='user', read_only=True)
-    profile_photo = serializers.ImageField(required=False)  # Add this line
-
-    class Meta:
-        model = CustomUser
-        fields = "__all__"
+        fields = ['id', 'name', 'email', 'phone', 'user_type', 'is_active', 'is_admin', 'is_staff', 'is_google', 'is_verify', 'date_joined', 'profile_photo']
 
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,3 +57,17 @@ class OwnerPostSerializer(serializers.ModelSerializer):
         return images_serializer.data
     
     
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['name', 'phone', 'profile_photo']
+
+    def validate_name(self, value):
+        # Add validation logic for name if needed
+        return value
+
+    def validate_phone(self, value):
+        # Add validation logic for phone if needed
+        return value

@@ -49,9 +49,7 @@ class myTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_google'] = user.is_google
         token['name'] = user.name
         token['phone'] = user.phone
-        if user.profile_photo:
-                # Assuming profile_photo is a FileField or ImageField
-                token['profile_photo'] = user.profile_photo.url        
+              
                 
 
         
