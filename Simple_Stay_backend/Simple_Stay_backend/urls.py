@@ -9,6 +9,8 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('owner/', include('owner.urls')),
     path('dashboard/', include('dashboard.urls')),
+    path('savedpost/', include('savedpost.urls')),  
+
     
 ]
 
