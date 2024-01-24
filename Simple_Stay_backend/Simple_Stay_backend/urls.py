@@ -10,6 +10,7 @@ urlpatterns = [
     path('owner/', include('owner.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('savedpost/', include('savedpost.urls')),  
+    path('premium/', include('premium.urls')),  
 
     
 ]

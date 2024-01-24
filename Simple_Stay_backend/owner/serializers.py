@@ -34,7 +34,7 @@ class UserGoogleSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'name', 'email', 'phone', 'user_type', 'is_active', 'is_admin', 'is_staff', 'is_google', 'is_verify', 'date_joined', 'profile_photo']
+        fields = ['id', 'name', 'email', 'phone', 'user_type', 'is_active', 'is_admin', 'is_staff', 'is_google', 'is_verify', 'date_joined', 'profile_photo','is_premium']
 
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,7 +62,7 @@ class OwnerPostSerializer(serializers.ModelSerializer):
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['name', 'phone', 'profile_photo']
+        fields = ['name', 'phone', 'profile_photo','is_premium']
 
     def validate_name(self, value):
         # Add validation logic for name if needed

@@ -21,7 +21,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserGoogleSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id','name','email','user_type','is_active','is_google']
+        fields = ['id','name','email','user_type','is_active','is_google','is_premium']
         extra_kwargs = {
             'password' : {'write_only' : True}
         }
@@ -49,7 +49,7 @@ class myTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_google'] = user.is_google
         token['name'] = user.name
         token['phone'] = user.phone
-              
+        token['is_premium'] =user.is_premium     
                 
 
         

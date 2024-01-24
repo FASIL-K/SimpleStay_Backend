@@ -225,12 +225,6 @@ def create_jwt_pair_tokens(user):
     }
 
 
-# class Authentication(APIView):
-#     permission_classes =(IsAuthenticated,)
-#     def get(self,request):
-#         content={'id':str(request.user.id),'email':str(request.user.email),'is_active':str(request.user.is_active)}
-#         return Response(content)  
-
  
 class logout(APIView):
     permission_classes =(IsAuthenticated,)

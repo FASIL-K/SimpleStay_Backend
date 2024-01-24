@@ -56,6 +56,7 @@ class CustomUser(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_google = models.BooleanField(default=False)
     is_verify = models.BooleanField(default=False)
+    is_premium = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)  # Add this line
     profile_photo = models.FileField(
         upload_to='Userprofiles/', blank=True, null=True)
