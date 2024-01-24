@@ -236,15 +236,13 @@ class logout(APIView):
     permission_classes =(IsAuthenticated,)
     def post(self, request):
         try:
-            refresh_token = request.data.get('refresh_token')
-            print(refresh_token,'daxoo')
+            refresh_token = request.data.get("refresh_token")
             token = RefreshToken(refresh_token)
             token.blacklist()
 
             return Response({'detail': 'Logout successful.'}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response({'detail': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
-        
         
         
 

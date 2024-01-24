@@ -20,6 +20,8 @@ urlpatterns = [
     path('resend-verification-email/', UserRegister.as_view(), name='resend_verification_email'),
     # path('authentication/',views_accounts.Authentication.as_view(), name='Authentication'), 
     path('logout/',views_accounts.logout.as_view(), name='logout'), 
+    # path('logout/', views_accounts.LogoutView.as_view(), name ='logout'),
+
     # path('token/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
     # path('refreshtoken/',views_accounts.RefreshTokenAuto.as_view(),name ='RefreshTokenAuto'),
     path('searchpost/', SearchPostList.as_view(),name = 'searchpost'),
