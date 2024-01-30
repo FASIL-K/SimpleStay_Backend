@@ -10,7 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from user.models import CustomUser
 from rest_framework.views import APIView
 from rest_framework import generics
-
+from premium.models import PremiumOwner
+from premium.serializer import PremiumOwnerSerializer
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
@@ -128,6 +129,18 @@ class PostList(ListAPIView):
 
     
 
+# class UserDetailsAPIView(generics.RetrieveAPIView):
+#     serializer_class = CustomUserSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_object(self):
+#         return self.request.user
+
+#     def retrieve(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance)
+#         return Response(serializer.data)    
+
 class UserDetailsAPIView(generics.RetrieveAPIView):
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
@@ -136,10 +149,23 @@ class UserDetailsAPIView(generics.RetrieveAPIView):
         return self.request.user
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)    
+        user_instance = self.get_object()
+        user_serializer = self.get_serializer(user_instance)
 
+        try:
+            premium_owner_instance = PremiumOwner.objects.get(user=user_instance)
+            premium_owner_serializer = PremiumOwnerSerializer(premium_owner_instance)
+
+            # Combine user and premium owner details
+            combined_data = {
+                "user_details": user_serializer.data,
+                "premium_owner_details": premium_owner_serializer.data,
+            }
+
+            return Response(combined_data)
+        except PremiumOwner.DoesNotExist:
+            # If the user is not a premium owner, return only user details
+            return Response(user_serializer.data)
 
 class UserProfileUpdateView(RetrieveUpdateAPIView):
     serializer_class = UserProfileUpdateSerializer
