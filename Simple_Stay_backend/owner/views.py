@@ -176,3 +176,90 @@ class UserProfileUpdateView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+    
+import requests
+from django.http import JsonResponse
+
+from math import radians, sin, cos, sqrt, atan2
+def haversine_distance(lat1, lon1, lat2, lon2):
+    # Radius of the Earth in kilometers
+    R = 6371.0
+
+    # Convert latitude and longitude from degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [float(lat1), float(lon1), float(lat2), float(lon2)])
+
+    # Haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    # Calculate distance
+    distance = R * c
+
+    return round(distance, 2)
+
+def categorize_place_type(place_type):
+    # Custom function to categorize place types
+    if 'school' in place_type:
+        return 'school'
+    elif 'pharmacy' in place_type:
+        return 'pharmacy'
+    elif 'restaurant' in place_type:
+        return 'restaurant'
+    elif 'hospital' in place_type:
+        return 'hospital'
+    elif 'police_station' in place_type:
+        return 'police'
+    elif 'movie_theater' in place_type:
+        return 'movie_theater'
+    else:
+        return 'other'
+
+def fetch_nearby_places(request):
+    # Extract the parameters from the frontend request or pass them as needed
+    location = request.GET.get('location', )
+    radius = request.GET.get('radius', '5000')
+    
+    # Specify the priority categories
+    priority_categories = ['school', 'pharmacy', 'restaurant', 'hospital', 'police', 'movie_theater']
+    
+    # Maximum number of places to display for each category
+    max_places_per_category = 1
+
+    api_key = 'AIzaSyDH8DKerF4jGQdGzE77cAN3or2rU7CiBJw'
+    places_data = []
+
+    for category in priority_categories:
+        # Replace spaces in category with underscores
+        formatted_category = category.replace(' ', '_')
+        url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={location}&radius={radius}&type={formatted_category}&key={api_key}'
+        
+        try:
+            response = requests.get(url)
+            data = response.json()
+            if 'results' in data:
+                places = data['results'][:max_places_per_category]
+                for place in places:
+                    # Calculate distance and add it to the place data
+                    place['distance'] = haversine_distance(location.split(',')[0], location.split(',')[1], place['geometry']['location']['lat'], place['geometry']['location']['lng'])
+                    # Categorize place type
+                    place['category'] = categorize_place_type(place['types'][0])
+                    # Extract only necessary information for the response
+                    place_data = {
+                        'name': place['name'],
+                        'category': place['category'],
+                        'distance': place['distance'],
+                        'geometry': place['geometry']['location']
+                    }
+                    places_data.append(place_data)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # Sort the places first by category priority, then by distance
+    sorted_places_data = sorted(places_data, key=lambda x: (priority_categories.index(x['category']) if x['category'] in priority_categories else float('inf'), x['distance']))
+
+    return JsonResponse({'results': sorted_places_data})
+
+

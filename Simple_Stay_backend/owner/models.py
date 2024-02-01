@@ -40,6 +40,8 @@ class Post(models.Model):
     is_verify = models.BooleanField(default=False)
     is_blocked_by_admin = models.BooleanField(default=False)
     amenities = models.ManyToManyField('Amenity', related_name='posts_amenities')
+    lat = models.FloatField(default=0.0)
+    long = models.FloatField(default=0.0)
 
 class Amenity(models.Model):
     name = models.CharField(max_length=50)
@@ -49,7 +51,7 @@ class Amenity(models.Model):
         return self.name
 
 
-class PropertyImage(models.Model):
+class PropertyImage(models.Model):  
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='property_images/', validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])])
 

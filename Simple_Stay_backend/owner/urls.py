@@ -23,6 +23,8 @@ urlpatterns = [
     path('logout/',OwnerLogout.as_view(), name='PostList'),
     path('profileEdit/<int:pk>/', UserProfileUpdateView.as_view(), name='profile-edit'),
     path('user-details/', UserDetailsAPIView.as_view(), name='user-details'),
+    path('fetch_nearby_places/', fetch_nearby_places, name='fetch_nearby_places'),
+
 
 
     
