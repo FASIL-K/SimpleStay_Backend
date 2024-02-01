@@ -40,13 +40,18 @@ class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyImage
         fields = ['id', 'image']
-        
+
+
+class AmenitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Amenity
+        fields = '__all__'  # Add specific fields if needed
+
 class OwnerPostSerializer(serializers.ModelSerializer):
     owner_detail = OwnerSerializer(source="owner", read_only=True)
-        # user_main = UserSerializer(source='user', read_only=True)
-
+    amenities = AmenitySerializer(many=True, required=False)  # Allow amenities to be optional during creation
     images = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Post
         fields = '__all__'
@@ -55,8 +60,29 @@ class OwnerPostSerializer(serializers.ModelSerializer):
         images_queryset = obj.propertyimage_set.all()
         images_serializer = PropertyImageSerializer(images_queryset, many=True)
         return images_serializer.data
-    
-    
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # Use the related manager to get amenities for the current post
+        amenities_queryset = instance.amenitie.all()
+        amenities_serializer = AmenitySerializer(amenities_queryset, many=True)
+
+        # Add post and owner details to the response
+        representation['amenities'] = amenities_serializer.data
+        representation['owner_details'] = OwnerSerializer(instance.owner).data  
+
+        return representation
+    def create(self, validated_data):
+        amenities_data = self.context['request'].data.get('amenities', '')
+        amenities_list = [{"name": amenity} for amenity in amenities_data.split(',')]
+        validated_data.pop('amenities', None)
+        property_instance = Post.objects.create(**validated_data)
+
+        for amenity_data in amenities_list:
+            amenity, created = Amenity.objects.get_or_create(name=amenity_data['name'], post=property_instance)
+
+        return property_instance
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):

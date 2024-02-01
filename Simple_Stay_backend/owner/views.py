@@ -32,7 +32,9 @@ class PostViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         owner_id = self.kwargs['owner_id']
         request.data['owner'] = owner_id
-        serializer = OwnerPostSerializer(data=request.data)
+        print(request.data,'date')
+        
+        serializer = OwnerPostSerializer(data=request.data, context={'request': request})
 
         if serializer.is_valid():
             post_instance = serializer.save()
@@ -122,6 +124,7 @@ class PostList(ListAPIView):
         "ownerinfo_id",
         "property_type",
         "rentprice",
+        "amenities"
     ]
     serializer_class = OwnerPostSerializer
 
