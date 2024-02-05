@@ -25,6 +25,8 @@ urlpatterns = [
     # path('token/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
     # path('refreshtoken/',views_accounts.RefreshTokenAuto.as_view(),name ='RefreshTokenAuto'),
     path('searchpost/', SearchPostList.as_view(),name = 'searchpost'),
+    path('filterpost/', FilterPostList.as_view(), name='filter_post_list'),
+
 
 ]
 

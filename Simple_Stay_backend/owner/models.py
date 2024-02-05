@@ -4,12 +4,6 @@ from user.models import CustomUser
 
 
 
-# class Amenity(models.Model):
-#     name = models.CharField(max_length=50)
-#     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='amenities')
-
-#     def __str__(self):
-#         return self.name
 
 class OwnerInfo(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

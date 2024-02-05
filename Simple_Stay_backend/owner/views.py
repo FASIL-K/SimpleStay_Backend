@@ -92,11 +92,13 @@ def get_owner_details(owner_id):
     except CustomUser.DoesNotExist:
         return {}
 
-
+        
 
 class UserPostViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = OwnerPostSerializer
     queryset = Post.objects.filter(is_available=True)
+    # queryset = Post.objects.filter(owneris_blocked_by_admin=False).order_by('-created_at')
+
 
 
 

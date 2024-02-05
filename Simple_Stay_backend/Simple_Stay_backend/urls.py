@@ -11,6 +11,7 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('savedpost/', include('savedpost.urls')),  
     path('premium/', include('premium.urls')),  
+    path('chat/', include('chat.urls')),  
 
     
 ]
