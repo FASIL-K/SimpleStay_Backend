@@ -60,6 +60,18 @@ class SearchPostList(ListCreateAPIView):
 #         return queryset
 
 
+
+class UserDetailView(APIView):
+    def get(self, request, pk):
+        try:
+            user = CustomUser.objects.get(pk=pk)
+            serializer = UserInfoSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    
+
 class FilterPostList(ListAPIView):
     queryset = Post.objects.all()
     serializer_class = OwnerPostSerializer
@@ -99,3 +111,6 @@ class FilterPostList(ListAPIView):
             queryset = queryset.filter(monthly_rent__lte=max_monthly_rent)
 
         return queryset
+
+
+

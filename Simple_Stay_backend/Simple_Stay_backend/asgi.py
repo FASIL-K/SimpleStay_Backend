@@ -1,33 +1,60 @@
-"""
-ASGI config for Simple_Stay_backend project.
+# """
+# ASGI config for Simple_Stay_backend project.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
+# It exposes the ASGI callable as a module-level variable named ``application``.
 
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
-"""
+# For more information on this file, see
+# https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
+# """
 
-import os
+# import os
 
-from django.core.asgi import get_asgi_application
+# from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Simple_Stay_backend.settings')
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Simple_Stay_backend.settings')
 
-application = get_asgi_application()
+# application = get_asgi_application()
+
+# import os
+# from django.core.asgi import get_asgi_application
+# from channels.routing import ProtocolTypeRouter, URLRouter
+# from channels.auth import AuthMiddlewareStack
+# import chat.routing  # assuming this is where your WebSocket routing is
+
+# application = ProtocolTypeRouter(
+#     {
+#         "http": get_asgi_application(),
+#         "websocket": AuthMiddlewareStack(
+#             URLRouter(
+#                 chat.routing.websocket_urlpatterns
+#             )
+#         ),
+#     }
+# )
+
+
+
 
 import os
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-import chat.routing  # assuming this is where your WebSocket routing is
+import chat.routing 
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Simple_Stay_backend.settings')
+
+# Get the Django ASGI application
+django_asgi_application = get_asgi_application()
+
+# WebSocket application
+websocket_application = AuthMiddlewareStack(
+    URLRouter(chat.routing.websocket_urlpatterns)
+)
+
+# Combined application for both HTTP and WebSocket
 application = ProtocolTypeRouter(
     {
-        "http": get_asgi_application(),
-        "websocket": AuthMiddlewareStack(
-            URLRouter(
-                chat.routing.websocket_urlpatterns
-            )
-        ),
+        "http": django_asgi_application,
+        "websocket": websocket_application,
     }
 )
