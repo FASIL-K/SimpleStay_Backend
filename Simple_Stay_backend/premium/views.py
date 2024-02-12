@@ -12,6 +12,7 @@ from rest_framework import status
 from user.models import CustomUser
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from decouple import config
+from .tasks import send_premium_created_email,test_task
 
 class PremiumPackagesViewSet(viewsets.ModelViewSet):
     queryset = PremiumPackages.objects.all()
@@ -52,7 +53,7 @@ class StripePayment(APIView):
                 cancel_url=cancel_url,
             )
 
-            print(session)
+            
 
             return Response({"message": session}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -73,6 +74,11 @@ class PaymentSuccess(APIView):
             return Response({"error": "Invalid planId"}, status=status.HTTP_400_BAD_REQUEST)
 
         premium_customer = PremiumOwner.objects.create(user_id=userid, package=package)
+        
+        print(premium_customer.user.email)
+        test_task.delay()
+
+        send_premium_created_email.delay(premium_customer.user.email)
 
         return Response({"message": "Payment successful"}, status=status.HTTP_200_OK)
 
