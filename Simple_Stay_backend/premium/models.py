@@ -14,7 +14,7 @@ class Feature(models.Model):
 class PremiumPackages(models.Model):
     name = models.CharField(max_length=50)
     price = models.PositiveIntegerField()
-    validity = models.PositiveIntegerField(default=30)
+    validity = models.PositiveSmallIntegerField(default=3)  # Changed to PositiveSmallIntegerField
     description = models.CharField(max_length=250)
     color = models.CharField(max_length=50)
     features = models.ManyToManyField(Feature, blank=True)
@@ -23,24 +23,25 @@ class PremiumPackages(models.Model):
     def __str__(self):
         return self.name
     
-
 class PremiumOwner(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     package = models.ForeignKey(PremiumPackages, on_delete=models.CASCADE)
-    start_date = models.DateField(auto_now_add=True)  
-    exp_date = models.DateField()
+    start_date = models.DateTimeField(auto_now_add=True)  # Change to DateTimeField
+    exp_date = models.DateTimeField()  # Change to DateTimeField
     is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         if not self.start_date:
-            self.start_date = timezone.now().date()
+            self.start_date = timezone.now()
 
-        self.exp_date = self.start_date + timedelta(days=self.package.validity)
+        # Calculate expiration date based on the selected package's validity in minutes
+        self.exp_date = self.start_date + timedelta(minutes=self.package.validity)
         super().save(*args, **kwargs)
 
     class Meta:
         unique_together = ['user', 'package']
 
+        
 @receiver(post_save, sender=PremiumOwner)
 def update_user_premium_status(sender, instance, created, **kwargs):
     if created:

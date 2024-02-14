@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework import generics
 from premium.models import PremiumOwner
 from premium.serializer import PremiumOwnerSerializer
+from django.core.exceptions import MultipleObjectsReturned
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
@@ -146,6 +147,34 @@ class PostList(ListAPIView):
 #         serializer = self.get_serializer(instance)
 #         return Response(serializer.data)    
 
+# class UserDetailsAPIView(generics.RetrieveAPIView):
+#     serializer_class = CustomUserSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_object(self):
+#         return self.request.user
+
+#     def retrieve(self, request, *args, **kwargs):
+#         user_instance = self.get_object()
+#         user_serializer = self.get_serializer(user_instance)
+
+#         try:
+#             premium_owner_instance = PremiumOwner.objects.get(user=user_instance)
+#             premium_owner_serializer = PremiumOwnerSerializer(premium_owner_instance)
+
+#             # Combine user and premium owner details
+#             combined_data = {
+#                 "user_details": user_serializer.data,
+#                 "premium_owner_details": premium_owner_serializer.data,
+#             }
+
+#             return Response(combined_data)
+#         except PremiumOwner.DoesNotExist:
+#             # If the user is not a premium owner, return only user details
+#             return Response(user_serializer.data)
+
+
+
 class UserDetailsAPIView(generics.RetrieveAPIView):
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
@@ -158,18 +187,28 @@ class UserDetailsAPIView(generics.RetrieveAPIView):
         user_serializer = self.get_serializer(user_instance)
 
         try:
-            premium_owner_instance = PremiumOwner.objects.get(user=user_instance)
-            premium_owner_serializer = PremiumOwnerSerializer(premium_owner_instance)
-
-            # Combine user and premium owner details
-            combined_data = {
-                "user_details": user_serializer.data,
-                "premium_owner_details": premium_owner_serializer.data,
-            }
-
-            return Response(combined_data)
-        except PremiumOwner.DoesNotExist:
-            # If the user is not a premium owner, return only user details
+            premium_owner_instances = PremiumOwner.objects.filter(user=user_instance)
+            for premium_owner_instance in premium_owner_instances:
+                if premium_owner_instance.is_active:  # Check if the package is active
+                    premium_owner_serializer = PremiumOwnerSerializer(premium_owner_instance)
+                    combined_data = {
+                        "user_details": user_serializer.data,
+                        "premium_owner_details": premium_owner_serializer.data,
+                    }
+                    return Response(combined_data)
+            # If no active premium owner instances found, return only user details
+            return Response(user_serializer.data)
+        except MultipleObjectsReturned:
+            # If multiple premium owner instances are found, check for an active one
+            for premium_owner_instance in premium_owner_instances:
+                if premium_owner_instance.is_active:  # Check if the package is active
+                    premium_owner_serializer = PremiumOwnerSerializer(premium_owner_instance)
+                    combined_data = {
+                        "user_details": user_serializer.data,
+                        "premium_owner_details": premium_owner_serializer.data,
+                    }
+                    return Response(combined_data)
+            # If no active premium owner instances found, return only user details
             return Response(user_serializer.data)
 
 class UserProfileUpdateView(RetrieveUpdateAPIView):

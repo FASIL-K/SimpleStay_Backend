@@ -45,16 +45,25 @@ from .models import CustomUser
 
 User = get_user_model()
 
+# @receiver(post_save, sender=CustomUser)
+# def send_welcome_email(sender, instance, created, **kwargs):
+#     print("signals triggerd 1")
+#     try:
+#         if instance.is_verify:
+#             print("signals triggerd 2")
+#             subject = 'Welcome to Our SimpleStay'
+#             message = f'Hello {instance.email},\n\nWelcome to our website! Account was Activated Thank you for joining us.'
+#             from_email = settings.EMAIL_HOST_USER
+#             recipient_list = [instance.email]
+#             send_mail(subject, message, from_email, recipient_list)
+#     except Exception as e:
+#         print(f"Exception in send_welcome_email: {e}")
+
 @receiver(post_save, sender=CustomUser)
 def send_welcome_email(sender, instance, created, **kwargs):
-    print("signals triggerd 1")
-    try:
-        if instance.is_verify:
-            print("signals triggerd 2")
-            subject = 'Welcome to Our SimpleStay'
-            message = f'Hello {instance.email},\n\nWelcome to our website! Account was Activated Thank you for joining us.'
-            from_email = settings.EMAIL_HOST_USER
-            recipient_list = [instance.email]
-            send_mail(subject, message, from_email, recipient_list)
-    except Exception as e:
-        print(f"Exception in send_welcome_email: {e}")
+    if created and instance.is_verify:
+        subject = 'Welcome to Our SimpleStay'
+        message = f'Hello {instance.email},\n\nWelcome to our website! Your account has been activated. Thank you for joining us.'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [instance.email]
+        send_mail(subject, message, from_email, recipient_list) 

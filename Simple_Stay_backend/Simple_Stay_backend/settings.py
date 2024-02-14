@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
+    'django_celery_beat',
 
 
     'rest_framework',
@@ -141,6 +142,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
 
+
+CELERY_BEAT_SCHEDULE = {
+    'check-package-expiration': {
+        'task': 'premium.tasks.check_package_expiration',
+        'schedule': timedelta(minutes=3),  # Run the task every 3 minutes
+    },
+}
 
 
 CHANNEL_LAYERS = {
