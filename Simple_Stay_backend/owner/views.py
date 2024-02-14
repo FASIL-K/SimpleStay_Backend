@@ -13,9 +13,12 @@ from rest_framework import generics
 from premium.models import PremiumOwner
 from premium.serializer import PremiumOwnerSerializer
 from django.core.exceptions import MultipleObjectsReturned
+from rest_framework import filters
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
+    filter_backends = [filters.SearchFilter]
+
     # permission_classes = (IsAuthenticated,)
 
     
@@ -27,7 +30,36 @@ class PostViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         owner_id = self.kwargs['owner_id']
-        queryset = Post.objects.filter(owner=owner_id,is_blocked_by_admin=False).order_by('-created_at')
+        queryset = Post.objects.filter(owner=owner_id, is_blocked_by_admin=False).order_by('-created_at')
+            
+            # Filter by BHK type if provided in query params
+        bhk_types_param = self.request.query_params.get('bhk_type', '')
+        bhk_types = [bhk.strip() for bhk in bhk_types_param.split(',') if bhk.strip()]
+
+        if bhk_types:
+            queryset = queryset.filter(bhk_type__in=bhk_types)
+
+        property_types_param = self.request.query_params.get('property_type', '')
+        property_types = [property_type.strip() for property_type in property_types_param.split(',') if property_type.strip()]
+
+        if property_types:
+            queryset = queryset.filter(property_type__in=property_types)
+
+        furnished_types_param = self.request.query_params.get('furnished_type', '')
+        furnished_types = [furnished_type.strip() for furnished_type in furnished_types_param.split(',') if furnished_type.strip()]
+
+        if furnished_types:
+            queryset = queryset.filter(furnished_type__in=furnished_types)
+
+        min_monthly_rent = self.request.query_params.get('min_monthly_rent', None)
+        max_monthly_rent = self.request.query_params.get('max_monthly_rent', None)
+
+        if min_monthly_rent is not None:
+            queryset = queryset.filter(monthly_rent__gte=min_monthly_rent)
+
+        if max_monthly_rent is not None:
+            queryset = queryset.filter(monthly_rent__lte=max_monthly_rent)
+    
         return queryset
 
     def create(self, request, *args, **kwargs):

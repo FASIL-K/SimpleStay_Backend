@@ -112,7 +112,7 @@ class PaymentSuccess(APIView):
             # If the user already has an active premium package,
             # update the expiration date and start date of the existing package
             existing_premium.start_date = current_time
-            existing_premium.exp_date = current_time + timedelta(minutes=package.validity)
+            existing_premium.exp_date = current_time + timedelta(days=package.validity)
             existing_premium.save()
             # Send email notification
             send_premium_created_email.delay(existing_premium.user.email)
@@ -138,7 +138,7 @@ class PaymentSuccess(APIView):
                 expired_premium.is_active = True
                 expired_premium.user.is_premium = True
                 expired_premium.start_date = current_time
-                expired_premium.exp_date = current_time + timedelta(minutes=package.validity)
+                expired_premium.exp_date = current_time + timedelta(days=package.validity)
                 expired_premium.save()
                 expired_premium.user.save()
 
@@ -151,7 +151,7 @@ class PaymentSuccess(APIView):
                 user_id=userid,
                 package=package,
                 start_date=current_time,
-                exp_date=current_time + timedelta(minutes=package.validity)
+                exp_date=current_time + timedelta(days=package.validity)
             )
 
             # Dispatch Celery tasks, send email, etc.

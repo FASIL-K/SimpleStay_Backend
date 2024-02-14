@@ -143,12 +143,14 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
 
 
-CELERY_BEAT_SCHEDULE = {
-    'check-package-expiration': {
-        'task': 'premium.tasks.check_package_expiration',
-        'schedule': timedelta(minutes=3),  # Run the task every 3 minutes
-    },
-}
+# CELERY_BEAT_SCHEDULE = {
+#     'check-package-expiration': {
+#         'task': 'premium.tasks.check_package_expiration',
+#         'schedule': timedelta(minutes=3),  # Run the task every 3 minutes
+#     },
+# }
+
+CELERY_BEAT_SCHEDULER  = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
 CHANNEL_LAYERS = {

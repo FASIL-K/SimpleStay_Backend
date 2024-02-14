@@ -26,9 +26,6 @@ def send_premium_created_email(user_email):
     # Send the email
     send_mail(subject, message, sender_email, [user_email])
 
-@shared_task
-def test_task():
-    print("This is a test task. Celery is working properly!")
 
 # @shared_task
 # def check_package_expiration():
@@ -67,7 +64,7 @@ def check_package_expiration():
 
     # Get all premium owners whose expiration date is within one minute
     expiring_packages = PremiumOwner.objects.filter(
-        exp_date__gt=timezone.now() - timedelta(minutes=1),
+        exp_date__gt=timezone.now() - timedelta(days=1),
         exp_date__lte=timezone.now()  # Expires now or in the past
     )
 
