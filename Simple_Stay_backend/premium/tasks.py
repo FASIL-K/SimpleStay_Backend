@@ -62,7 +62,6 @@ def send_premium_created_email(user_email):
 def check_package_expiration():
     logger.info("Checking package expiration")
 
-    # Get all premium owners whose expiration date is within one minute
     expiring_packages = PremiumOwner.objects.filter(
         exp_date__gt=timezone.now() - timedelta(days=1),
         exp_date__lte=timezone.now()  # Expires now or in the past

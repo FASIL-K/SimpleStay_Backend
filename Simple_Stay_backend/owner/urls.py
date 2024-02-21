@@ -26,6 +26,4 @@ urlpatterns = [
     path('fetch_nearby_places/', fetch_nearby_places, name='fetch_nearby_places'),
 
 
-
-    
 ]

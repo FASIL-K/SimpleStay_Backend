@@ -82,7 +82,22 @@ class FilterPostList(ListAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()   
 
-        # Apply filtering conditions based on query parameters (e.g., bhk_type, property_type)
+        # Get city and type parameters
+        city_param = self.request.query_params.get('city', '')
+        type_param = self.request.query_params.get('type', '')
+        print(type_param,"dsaaaaaaaa")
+        if type_param == 'P/G':
+            type_param='PG/CO-living'
+        # Filter queryset based on city
+        city_types = [city.strip() for city in city_param.split(',') if city.strip()]
+        if city_types:
+            queryset = queryset.filter(city__in=city_types)
+
+        # Filter queryset based on looking_to
+        if type_param:
+            queryset = queryset.filter(looking_to=type_param)
+
+        # Apply other filtering conditions based on query parameters (e.g., bhk_type, property_type)
         bhk_types_param = self.request.query_params.get('bhk_type', '')
         bhk_types = [bhk.strip() for bhk in bhk_types_param.split(',') if bhk.strip()]
 

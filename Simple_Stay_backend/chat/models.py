@@ -11,4 +11,4 @@ class Message(models.Model):
 
     
     def __str__(self):
-        return f"{self.sender.username} sent to {self.reciever.username} at {self.timestamp}"
+        return f"{self.sender.name} sent to {self.receiver.name} at {self.timestamp}"

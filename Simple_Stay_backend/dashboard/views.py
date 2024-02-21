@@ -1,5 +1,5 @@
 from urllib import response
-from rest_framework.generics import RetrieveDestroyAPIView,ListAPIView,UpdateAPIView,ListCreateAPIView
+from rest_framework.generics import RetrieveDestroyAPIView,ListAPIView,UpdateAPIView,ListCreateAPIView,RetrieveAPIView
 from user.models import CustomUser
 from user.serializers import UserInfoSerializer
 from rest_framework import status,viewsets, status
@@ -10,6 +10,13 @@ from rest_framework.pagination import PageNumberPagination
 from owner.serializers import OwnerPostSerializer
 from owner.models import Post
 from rest_framework.decorators import action
+from django.http import JsonResponse
+from premium.models import PremiumOwner
+from django.db.models import Sum, Count
+# from space.models import CoworkSpaceBooking, ConferenceHallBooking, CoWorkSpace, ConferenceHall
+from .serializers import ConferenceHallAndCoworkSpaceBookingSerializer, PremiumBookingReportSerializer
+
+
 
 
 
@@ -126,3 +133,74 @@ class VerifyPost(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class UserCountAPIView(RetrieveAPIView):
+    def get(self, request, *args, **kwargs):
+        
+        owner_count = CustomUser.objects.filter(user_type='owner').count()
+        user_count = CustomUser.objects.filter(user_type='user').count()
+
+        # You should include logic here to serialize the data if needed
+        # For simplicity, I'm returning a basic JSON response
+        response_data = {'users': [owner_count, user_count]}
+
+        return JsonResponse(response_data)
+
+class TotalRevenueAPI(RetrieveAPIView):
+    def get(self, request, *args, **kwargs):
+
+        total_price = PremiumOwner.objects.all().aggregate(total_price=Sum('package__price'))
+        rent_count = Post.objects.filter(looking_to='Rent').count()
+        pg_count=Post.objects.filter(looking_to="PG/CO-living").count()
+        response_data = {'data':[total_price,{'rent_count':rent_count},{'pg_count':pg_count}]}
+        return JsonResponse(response_data)
+
+# class ConferenceHallSales(RetrieveAPIView):
+#     queryset = ConferenceHallBooking.objects.all()
+#     serializer_class = ConferenceHallAndCoworkSpaceBookingSerializer
+
+#     def get(self, request, *args, **kwargs):
+#         user_id = kwargs.get('pk')
+#         if user_id:
+#             sales_data = self.queryset.filter(hall__customer=user_id).values('created_date').annotate(total_sales=Sum('price'))
+#         else:
+#             sales_data = self.queryset.values('created_date').annotate(total_sales=Sum('price'))
+
+#         # Serialize the data
+#         serialized_data = self.serializer_class(sales_data, many=True).data
+
+#         return JsonResponse(serialized_data, safe=False)
+
+# class CoworkingSpaceSales(RetrieveAPIView):
+#     queryset = CoworkSpaceBooking.objects.all()
+#     serializer_class = ConferenceHallAndCoworkSpaceBookingSerializer
+
+#     def get(self, request, *args, **kwargs):
+#         user_id = kwargs.get('pk')
+#         if user_id:
+#             annotated_queryset = self.queryset.filter(space__customer=user_id).values('created_date').annotate(total_sales=Sum('price'))
+#         # Annotate the queryset to get total sales for each booking date
+#         else:
+#             annotated_queryset = self.queryset.values('created_date').annotate(total_sales=Sum('price'))
+
+#         # Serialize the annotated queryset
+#         serialized_data = self.serializer_class(annotated_queryset, many=True).data
+
+#         return JsonResponse(serialized_data, safe=False)
+
+class PremiumSales(RetrieveAPIView):
+    queryset = PremiumOwner.objects.all()
+    serializer_class = PremiumBookingReportSerializer
+
+    def get(self, request, *args, **kwargs):
+        # Annotate the queryset with total purchase count and total price
+        annotated_queryset = self.queryset.values('package__name').annotate(
+            total_purchase=Count('package'),
+            total_price=Sum('package__price')
+        )
+
+        # Return the annotated data
+        return Response(annotated_queryset)

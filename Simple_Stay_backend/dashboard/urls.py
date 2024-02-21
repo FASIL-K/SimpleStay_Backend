@@ -17,6 +17,11 @@ urlpatterns = [
 
     path('post_verification/<int:pk>/',VerifyPost.as_view(),name='postverification'),
 
+    path('usercount/<str:type>/', UserCountAPIView.as_view(), name='user_count_viewer'),
+    path('premium/', TotalRevenueAPI.as_view(), name='total_premium_sales'),
+    # path('conference/', ConferenceHallSales.as_view(), name='ConferenceHallSales'),
+    # path('admin/cowork/', CoworkingSpaceSales.as_view(), name='CoworkingSpaceSales'),
+    path('premiumplan/', PremiumSales.as_view(), name='PremiumSales'),
 
 
 

@@ -14,7 +14,8 @@ class Feature(models.Model):
 class PremiumPackages(models.Model):
     name = models.CharField(max_length=50)
     price = models.PositiveIntegerField()
-    validity = models.PositiveSmallIntegerField(default=3)  # Changed to PositiveSmallIntegerField
+    validity = models.PositiveSmallIntegerField(default=30)  # Changed to PositiveSmallIntegerField
+
     description = models.CharField(max_length=250)
     color = models.CharField(max_length=50)
     features = models.ManyToManyField(Feature, blank=True)
@@ -35,7 +36,7 @@ class PremiumOwner(models.Model):
             self.start_date = timezone.now()
 
         # Calculate expiration date based on the selected package's validity in minutes
-        self.exp_date = self.start_date + timedelta(minutes=self.package.validity)
+        self.exp_date = self.start_date + timedelta(days=self.package.validity)
         super().save(*args, **kwargs)
 
     class Meta:

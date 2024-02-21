@@ -14,6 +14,7 @@ from premium.models import PremiumOwner
 from premium.serializer import PremiumOwnerSerializer
 from django.core.exceptions import MultipleObjectsReturned
 from rest_framework import filters
+from decouple import config
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = OwnerPostSerializer
@@ -59,7 +60,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         if max_monthly_rent is not None:
             queryset = queryset.filter(monthly_rent__lte=max_monthly_rent)
-    
+
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -303,7 +304,7 @@ def fetch_nearby_places(request):
     # Maximum number of places to display for each category
     max_places_per_category = 1
 
-    api_key = 'AIzaSyDH8DKerF4jGQdGzE77cAN3or2rU7CiBJw'
+    api_key=config('GOOGLE_MAP_API_KEY')
     places_data = []
 
     for category in priority_categories:

@@ -6,6 +6,10 @@ from rest_framework_simplejwt.tokens import Token
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.validators import ValidationError
+from rest_framework import serializers
+
+# from space.models import CoWorkSpace, ConferenceHall, ConferenceHallBooking, ConferenceHallBooking
+
 
 
 
@@ -31,4 +35,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
-         
+
+
+class ConferenceHallAndCoworkSpaceBookingSerializer(serializers.Serializer):
+    created_date = serializers.DateField()
+    total_sales = serializers.IntegerField()
+
+
+class PremiumBookingReportSerializer(serializers.Serializer):
+    package__name = serializers.CharField()
+    total_purchase = serializers.IntegerField()
+    total_price= serializers.IntegerField()
