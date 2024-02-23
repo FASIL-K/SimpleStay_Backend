@@ -108,7 +108,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',  
-    'https://simple-stay-fronted.vercel.app/',  
+    'https://simple-stay-fronted.vercel.app',  
+    
 ]
 
 

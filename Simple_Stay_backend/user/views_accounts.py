@@ -130,13 +130,13 @@ def activate(request, uidb64, token):
             user.is_active = True
             user.save()
             message = "Congrats, You have been successfully registered"
-            redirect_url = 'http://localhost:5173/login/' + '?message=' + message + '?token' + token
+            redirect_url = 'https://simplestay.molla.cloud/login/' + '?message=' + message + '?token' + token
         else:
             message = 'Verification link has expired. Please request a new one.'
-            redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
+            redirect_url = 'https://simplestay.molla.cloud/signup/' + '?message=' + message
     else:
         message = 'Invalid activation link'
-        redirect_url = 'http://localhost:5173/signup/' + '?message=' + message
+        redirect_url = 'https://simplestay.molla.cloud/signup/' + '?message=' + message
 
     return HttpResponseRedirect(redirect_url)   
 
